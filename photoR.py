@@ -1,5 +1,5 @@
-import PIL
 import PIL.Image
+import PIL.ImageOps
 import glob
 import os
 from os import listdir
@@ -72,18 +72,40 @@ def compress_img(quality=50, directory=False):
     print("All of the photos were compressed safely!")
 
 
+def mirror_img(directory=False):
+    print("Mirroring is starting...")
+    photos = listdir(path)
+    if directory:
+        os.chdir(directory)
 
+    i = 1
+    for image in photos:
+        
+        percentage = 100 * i / len(photos)
+        print(f"%{percentage}")
+        img = PIL.Image.open(image)
+        img = PIL.ImageOps.mirror(img)
+        img.save(image)
+        i += 1
+        time.sleep(0.1)
+        os.system(f"rm -r {image}")
+        time.sleep(0.1)
+    print("All of the photos were mirrored safely!")
+    
 root = Tk()
 
 var_resize = IntVar()
 var_rotate = IntVar()
 var_compress = IntVar()
-check_resize = Checkbutton(root, text = "Boyutlandir", variable = var_resize)
-check_rotate = Checkbutton(root, text = "Dondur", variable = var_rotate)
-check_compress = Checkbutton(root, text = "Sikistir", variable = var_compress)
+var_mirror = IntVar()
+check_resize = Checkbutton(root, text = "Boyutlandır", variable = var_resize)
+check_rotate = Checkbutton(root, text = "Döndur", variable = var_rotate)
+check_compress = Checkbutton(root, text = "Sıkıştır", variable = var_compress)
+check_mirror = Checkbutton(root, text = "Yansıt", variable = var_mirror)
 check_resize.grid()
 check_rotate.grid()
 check_compress.grid()
+check_mirror.grid()
 
 is_apply = False
 def apply_the_process():
@@ -91,11 +113,9 @@ def apply_the_process():
     is_apply = True
     root.quit()
     
-
 apply_button = Button(root, text = "Uygula", command = apply_the_process)
 
-
-resize_labels = {"width":Label(root, text = "Genislik: "), "height":Label(root, text = "Yukseklik: ")}
+resize_labels = {"width":Label(root, text = "Genişlik: "), "height":Label(root, text = "Yükseklik: ")}
 resize_entries = {"width":Entry(root), "height":Entry(root)}
 rotate_label = Label(root, text = "Derece: ")
 rotate_entry = Entry(root)
@@ -118,9 +138,8 @@ sizes = [resize_entries["width"].get(), resize_entries["height"].get()]
 rotate_degree = rotate_entry.get()
 compress_quality = compress_entry.get()
 
-processes = [var_resize.get(), var_rotate.get(), var_compress.get()]
+processes = [var_resize.get(), var_rotate.get(), var_compress.get(), var_mirror.get()]
 
-print(processes[1])
 if is_apply:
     if processes[0] == 1:
         resize_img(sizes, directory=path)
@@ -131,7 +150,9 @@ if is_apply:
     if processes[2] == 1:
         compress_img(compress_quality, directory=path)
         time.sleep(2)
-
+    if processes[3] == 1:
+        mirror_img(directory=path)
+        time.sleep(2)
 else:
     root.destroy()
     exit()
